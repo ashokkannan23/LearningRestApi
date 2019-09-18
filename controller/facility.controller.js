@@ -62,9 +62,27 @@ exports.updateFacility = async (req, res, next) => {
         return res.status(200).send(doc);
     }
     catch (e) {
-          // Handle scenario when certain parameter type is incorrect.
-          if (e.name == 'CastError') return next(Error.UserError('Invalid argument'));
-          return next(e);
+        // Handle scenario when certain parameter type is incorrect.
+        if (e.name == 'CastError') return next(Error.UserError('Invalid argument'));
+        return next(e);
 
+    }
+}
+
+exports.deleteFacility = async (req, res, next) => {
+    try {
+        var facility = await PropertyModel.findOne({ _id: req.params.facilityid });
+        if (!facility) throw Error.MissingItemError('Facility does not exist.');
+
+        facility = await facility.remove();
+        return res.status(200).json({
+            _id: facility._id,
+            message: 'Deleted'
+        })
+    }
+    catch (e) {
+        // Handle scenario when certain parameter type is incorrect.
+        if (e.name == 'CastError') return next(Error.UserError('Invalid argument'));
+        return next(e);
     }
 }
