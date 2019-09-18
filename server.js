@@ -18,7 +18,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 const propertyRoute = require('./routes/facility');
+const metaRoute = require('./routes/meta');
 app.use('/facility', propertyRoute);
+app.use('/meta', metaRoute);
 
 
 // Catch 404 error
