@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const propertyCtrl = require('../controller/facility.controller');
+const ImgCtrl = require('../utils/image.utils');
+const Error = require('../error/error');
 
 // Get All Facilites
 router.get('/', (req, res, next) => {
@@ -27,5 +29,25 @@ router.put('/:facilityid', (req, res, next) => {
 router.delete('/:facilityid', (req, res, next) => {
    return propertyCtrl.deleteFacility(req, res, next);
 });
+
+
+// Add image to a facility
+// Message body is as follows:
+//  file: <image-file>
+//  category: image-category-name
+//  description: image-description
+router.post('/image/:facilityid', ImgCtrl.Upload.single('file'), (req, res, next) => {
+    if (!req.file) return next(Error.ServerError('Error creating file'));
+    return propertyCtrl.uploadFacilityImage(req, res, next);
+});
+
+
+// Get facility image file
+router.get('/image/:filename', (req, res, next) => {
+    return propertyCtrl.getFacilityImage(req, res, next); 
+});
+
+
+
 
 module.exports = router;
