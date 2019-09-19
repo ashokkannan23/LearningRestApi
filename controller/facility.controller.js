@@ -13,6 +13,7 @@ exports.listFacility = async (req, res, next) => {
             return res.status(200).send(facility);
         } else {
             const facilities = await PropertyModel.find()
+                .select("name description phonenumber1")
                 .sort({ createdOn: 'desc' }).lean();
             res.status(200).send(facilities);
 
