@@ -2,6 +2,7 @@ var fs = require('fs');
 var resolve = require('path').resolve;
 const PropertyModel = require('../model/property.model');
 var ImgUtils = require('../utils/image.utils');
+var Utils = require('../utils/utils');
 const Error = require('../error/error');
 
 
@@ -96,9 +97,9 @@ exports.deleteFacility = async (req, res, next) => {
 // Add image to a facility
 exports.uploadFacilityImage = async (req, res, next) => {
     try {
-        var facilityDoc = await PropertyModel.findOne({_id: req.params.facilityid});
+        var facilityDoc = await PropertyModel.findOne({ _id: req.params.facilityid });
         if (!facilityDoc) throw Error.MissingItemError('Facility does not exist.');
-        
+
         var img = {
             category: req.body.category,
             description: req.body.description,
@@ -109,7 +110,7 @@ exports.uploadFacilityImage = async (req, res, next) => {
         facilityDoc.images.push(img);
         facilityDoc = await facilityDoc.save();
         return res.status(200).send(facilityDoc);
-    } catch(e) {
+    } catch (e) {
         // Handle scenario when certain parameter type is incorrect.
         if (e.name == 'CastError') return next(Error.UserError('Invalid argument'));
         return next(e);
@@ -123,6 +124,36 @@ exports.getFacilityImage = async (req, res, next) => {
     // Handle inexistent file path
     if (!filepath || !fs.existsSync(filepath))
         return next(Error.MissingItemError('File does not exist'));
-    
+
     return res.sendFile(resolve(filepath));
+}
+
+
+// Delete facility image
+exports.deleteFacilityImage = async (req, res, next) => {
+    try {
+        var facilityDoc = await PropertyModel.findOne({ _id: req.params.facilityid });
+        if (!facilityDoc) throw Error.MissingItemError('Facility does not exist.');
+
+        // Remember the image file name to be removed.
+        var img = facilityDoc.images.find(image => image._id == req.params.imageid);
+        if (!img) throw Error.MissingItemError('Image does not exist in said facility.');
+
+        var filepath = ImgUtils.getFacilityImageFilePath(img.url);
+
+        // Update the facility document
+        facilityDoc.images = facilityDoc.images.filter(image => image._id != req.params.imageid);
+        facilityDoc = await facilityDoc.save();
+
+        // Remove the image file
+        await Utils.removeDir(filepath);
+        return res.status(200).send(facilityDoc);
+
+    }
+    catch (e) {
+        // Handle scenario when certain parameter type is incorrect.
+        if (e.name == 'CastError') return next(Error.UserError('Invalid argument'));
+        return next(e);
+
+    }
 }

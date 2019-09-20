@@ -47,7 +47,10 @@ router.get('/image/:filename', (req, res, next) => {
     return propertyCtrl.getFacilityImage(req, res, next); 
 });
 
-
-
+// Delete an image associated with a facility
+// Must specify the image id in the URL path.
+router.delete('/image/:facilityid/:imageid', (req, res, next) => {
+    return propertyCtrl.deleteFacilityImage(req, res, next);
+});
 
 module.exports = router;
